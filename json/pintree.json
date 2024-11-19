@@ -25,6 +25,13 @@
           },
           {
             "type": "link",
+            "addDate": 1731852856636,
+            "title": "仪表盘 | CAC Apex",
+            "icon": "https://logo.clearbit.com/www.cacapex.com",
+            "url": "https://www.cacapex.com/#/dashboard"
+          },
+          {
+            "type": "link",
             "addDate": 1713173223762,
             "title": "仪表盘 - EdNovas云",
             "icon": "https://logo.clearbit.com/ednovas.org",
@@ -57,6 +64,20 @@
             "title": "用户中心 - WestData",
             "icon": "https://logo.clearbit.com/wd-gold.com",
             "url": "https://wd-gold.com/clientarea.php?verificationId=75b650d67b1f4437ab0186140ab8ab972edb80ab"
+          },
+          {
+            "type": "link",
+            "addDate": 1731741145188,
+            "title": "FacMata®",
+            "icon": "https://logo.clearbit.com/m3.fmta.boo",
+            "url": "https://m3.fmta.boo/#/dashboard"
+          },
+          {
+            "type": "link",
+            "addDate": 1731919067249,
+            "title": "UDWT.IO | 水下 | UNDERWATER",
+            "icon": "https://logo.clearbit.com/udwt.io",
+            "url": "https://udwt.io/overview"
           }
         ]
       },
@@ -120,6 +141,27 @@
             "title": "美国身份证生成，美国人地址信息生成-世界各国身份信息、地址、信用卡生成器",
             "icon": "https://logo.clearbit.com/www.shenfendaquan.com",
             "url": "https://www.shenfendaquan.com/"
+          },
+          {
+            "type": "link",
+            "addDate": 1731942035069,
+            "title": "Mini-Cover",
+            "icon": "https://logo.clearbit.com/cover.ruom.top",
+            "url": "https://cover.ruom.top/"
+          },
+          {
+            "type": "link",
+            "addDate": 1731942085342,
+            "title": "仪表盘",
+            "icon": "https://logo.clearbit.com/pic.wtr.cc",
+            "url": "https://pic.wtr.cc/user/dashboard"
+          },
+          {
+            "type": "link",
+            "addDate": 1731833075123,
+            "title": "Send",
+            "icon": "https://logo.clearbit.com/send.vis.ee",
+            "url": "https://send.vis.ee/"
           }
         ]
       },
@@ -148,7 +190,15 @@
         "type": "folder",
         "addDate": 1731665139306,
         "title": "其他",
-        "children": []
+        "children": [
+          {
+            "type": "link",
+            "addDate": 1731740273143,
+            "title": "BT影视_4k高清电影BT下载_蓝光迅雷电影下载_最新电视剧下载",
+            "icon": "https://logo.clearbit.com/www.btbtl.com",
+            "url": "https://www.btbtl.com/"
+          }
+        ]
       },
       {
         "type": "folder",
@@ -196,7 +246,15 @@
         "type": "folder",
         "addDate": 1731665112421,
         "title": "常用",
-        "children": []
+        "children": [
+          {
+            "type": "link",
+            "addDate": 1731830528928,
+            "title": "Custom.yaml",
+            "icon": "https://logo.clearbit.com/gist.github.com",
+            "url": "https://gist.github.com/xqd922/a39fb723f83d9d176e3b1105f9556bae"
+          }
+        ]
       },
       {
         "type": "link",
@@ -228,17 +286,17 @@
       },
       {
         "type": "link",
-        "addDate": 1731665096233,
-        "title": "新标签页",
-        "icon": "https://logo.clearbit.com/newtab",
-        "url": "chrome://newtab/"
+        "addDate": 1731722552014,
+        "title": "抖音",
+        "icon": "https://logo.clearbit.com/www.douyin.com",
+        "url": "https://www.douyin.com/?recommend=1"
       },
       {
         "type": "link",
-        "addDate": 1731722552014,
-        "title": "抖音-记录美好生活",
-        "icon": "https://logo.clearbit.com/www.douyin.com",
-        "url": "https://www.douyin.com/?recommend=1"
+        "addDate": 1731740076289,
+        "title": "学习通",
+        "icon": "https://logo.clearbit.com/i.mooc.chaoxing.com",
+        "url": "https://i.mooc.chaoxing.com/space/index?t=1592829485206"
       }
     ]
   }
