@@ -4,7 +4,7 @@
 ```
 ├── .git/                    # Git repository
 ├── .kiro/                   # Kiro AI assistant configuration
-├── prisma/                  # Database schema and migrations
+├── data/                    # JSON data files
 ├── public/                  # Static assets
 ├── src/                     # Source code
 ├── package.json             # Dependencies and scripts

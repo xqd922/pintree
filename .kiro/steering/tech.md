@@ -6,10 +6,9 @@
 - **TypeScript 5.6.3**: Type-safe JavaScript with strict mode enabled
 - **Node.js**: ES2017 target with ESM modules
 
-## Database & ORM
-- **PostgreSQL**: Primary database
-- **Prisma 5.21.1**: Database ORM and schema management
-- **Database URL**: Configured via `DATABASE_URL` environment variable
+## Data Storage
+- **JSON Files**: Static data storage in `data/bookmarks.json`
+- **No Database**: Simplified deployment without database dependencies
 
 ## Styling & UI
 - **Tailwind CSS 3.4.1**: Utility-first CSS framework
@@ -42,10 +41,10 @@ npm run start        # Start production server
 npm run lint         # Run ESLint
 ```
 
-### Database
+### Data Management
 ```bash
-npm run db:push      # Push schema changes to database
-npm run postinstall  # Generate Prisma client (runs automatically)
+# 编辑 data/bookmarks.json 文件来管理数据
+# 使用 scripts/import-bookmarks.js 导入浏览器书签
 ```
 
 ### Environment Setup
@@ -54,5 +53,5 @@ npm run postinstall  # Generate Prisma client (runs automatically)
 
 ## Deployment
 - **Platform**: Vercel (optimized configuration)
-- **Build Process**: Automated Prisma generation and database push
+- **Build Process**: Simple Next.js build with JSON data
 - **Image Handling**: Configured for external domains and SVG support
