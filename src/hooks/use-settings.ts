@@ -1,13 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
-interface Setting {
-  value: any;
-  type: string;
-  group: string;
-  description?: string;
-}
-
 export function useSettings(group?: string) {
   const [settings, setSettings] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
@@ -27,8 +20,6 @@ export function useSettings(group?: string) {
       setLoading(false);
     }
   };
-
-
 
   useEffect(() => {
     loadSettings();

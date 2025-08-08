@@ -8,7 +8,6 @@ import { BookmarkGrid } from "@/components/bookmark/BookmarkGrid";
 import { Header } from "@/components/website/header";
 
 import { Footer } from "@/components/website/footer";
-import { TopBanner } from "@/components/website/top-banner";
 
 import { GetStarted } from "@/components/website/get-started";
 import { BackToTop } from "@/components/website/back-to-top";
@@ -103,7 +102,6 @@ function SearchParamsComponent() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <TopBanner />
       <div className="flex flex-1">
         <SidebarProvider>
           {
