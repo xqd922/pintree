@@ -122,8 +122,19 @@ function convertBrowserBookmarks(browserData: BrowserBookmarkItem[]): DataStruct
     });
   }
   
-  // 处理根级别的项目
-  processItems(browserData);
+  // 查找书签栏文件夹并只处理其内容
+  const bookmarkBar = browserData.find(item => 
+    item.type === 'folder' && 
+    (item.title === '书签栏' || item.title === 'Bookmarks bar' || item.title === 'Bookmarks Bar')
+  );
+  
+  if (bookmarkBar && bookmarkBar.children) {
+    // 只处理书签栏下的内容
+    processItems(bookmarkBar.children);
+  } else {
+    // 如果没有找到书签栏，处理所有根级别的项目
+    processItems(browserData);
+  }
   
   return {
     collections,
