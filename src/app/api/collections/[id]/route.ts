@@ -1,12 +1,34 @@
-import { prisma } from "@/lib/prisma";
+import { dataService } from "@/lib/data";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
-import { Prisma } from "@prisma/client";
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    
+    const collection = dataService.getCollectionById(id);
+    
+    if (!collection) {
+      return NextResponse.json({ error: "Collection not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(collection);
+  } catch (error) {
+    console.error("Get collection error:", error);
+    return NextResponse.json(
+      { error: "Failed to get collection" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -14,64 +36,16 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, ...restData } = await request.json();
-    const slug = name ? name.toLowerCase().replace(/\s+/g, '-') : undefined;
-
-    // Check if name or slug already exists (case-insensitive)
-    if (name) {
-      const existingCollection = await prisma.collection.findFirst({
-        where: {
-          OR: [
-            { 
-              name: {
-                mode: 'insensitive',
-                equals: name
-              }
-            },
-            { 
-              slug: {
-                mode: 'insensitive',
-                equals: slug
-              }
-            }
-          ],
-          NOT: {
-            id: params.id
-          }
-        }
-      });
-
-      if (existingCollection) {
-        return NextResponse.json(
-          { error: "The name or slug is already in use" },
-          { status: 400 }
-        );
-      }
-    }
-
-    // Update collection with new slug
-    const collection = await prisma.collection.update({
-      where: {
-        id: params.id,
+    // JSON 文件模式下，更新集合需要手动编辑 JSON 文件
+    return NextResponse.json(
+      { 
+        error: "JSON 文件模式下，请直接编辑 data/bookmarks.json 文件来更新集合",
+        message: "In JSON file mode, please edit data/bookmarks.json directly to update collections"
       },
-      data: {
-        name,
-        slug,
-        ...restData
-      },
-    });
-
-    return NextResponse.json(collection);
+      { status: 501 }
+    );
   } catch (error) {
     console.error("Update collection error:", error);
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2002') {
-        return NextResponse.json(
-          { error: "The name or slug is already in use" },
-          { status: 400 }
-        );
-      }
-    }
     return NextResponse.json(
       { error: "Failed to update collection" },
       { status: 500 }
@@ -81,7 +55,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -89,13 +63,14 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await prisma.collection.delete({
-      where: {
-        id: params.id
+    // JSON 文件模式下，删除集合需要手动编辑 JSON 文件
+    return NextResponse.json(
+      { 
+        error: "JSON 文件模式下，请直接编辑 data/bookmarks.json 文件来删除集合",
+        message: "In JSON file mode, please edit data/bookmarks.json directly to delete collections"
       },
-    });
-
-    return NextResponse.json({ message: "Delete successful" });
+      { status: 501 }
+    );
   } catch (error) {
     console.error("Delete collection error:", error);
     return NextResponse.json(

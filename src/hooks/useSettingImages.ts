@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { getSettingImages } from '@/actions/get-setting-image';
 
 type Image = {
   id: string;
@@ -7,7 +6,6 @@ type Image = {
 }
 
 export const useSettingImages = (settingKey: string) => {
-  // const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [imagesData, setImagesData] = useState<Image[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,16 +13,28 @@ export const useSettingImages = (settingKey: string) => {
   useEffect(() => {
     const fetchSettingImages = async () => {
       try {
-        const result = await getSettingImages(settingKey);
-        if (result.success) {
-          const images = result.imageIds?.map((id: string) => ({ id, url: `/api/images/${id}` }));
+        // 在 JSON 模式下，从设置 API 获取图片 URL
+        const response = await fetch('/api/settings');
+        const settings = await response.json();
+        
+        let imageUrl = '';
+        switch (settingKey) {
+          case 'logoUrl':
+            imageUrl = settings.logoUrl || '/logo.png';
+            break;
+          case 'faviconUrl':
+            imageUrl = settings.faviconUrl || '/favicon.ico';
+            break;
+          default:
+            imageUrl = '';
+        }
 
-          setImagesData(images || []);
-          setError(null);
+        if (imageUrl) {
+          setImagesData([{ id: settingKey, url: imageUrl }]);
         } else {
           setImagesData([]);
-          setError(result.error || 'Get setting images failed');
         }
+        setError(null);
       } catch (err) {
         setImagesData([]);
         setError(err instanceof Error ? err.message : 'Get setting images failed');
@@ -34,11 +44,10 @@ export const useSettingImages = (settingKey: string) => {
     };
 
     fetchSettingImages();
-
   }, [settingKey]);
 
   return { 
-    images:imagesData, 
+    images: imagesData, 
     isLoading,
     error
   };

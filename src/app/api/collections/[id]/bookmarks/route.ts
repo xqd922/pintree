@@ -1,111 +1,69 @@
-import { prisma } from "@/lib/prisma";
+import { dataService } from "@/lib/data";
 import { NextResponse } from "next/server";
-import { Folder, Bookmark } from "@prisma/client";
-
-// 定义返回数据的类型
-interface FolderWithItems extends Folder {
-  items: Array<(Folder | Bookmark) & { type: 'folder' | 'bookmark' }>;
-}
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await Promise.resolve(params);
   try {
+    const { id } = await params;
     const { searchParams } = new URL(request.url);
-    const folderId = searchParams.get("folderId");
-    const sortField = searchParams.get("sortField") || "sortOrder";
-    const sortOrder = searchParams.get("sortOrder") || "asc";
-    const pageSize = parseInt(searchParams.get("pageSize") || "100");
+    const folderId = searchParams.get('folderId');
+    const includeSubfolders = searchParams.get('includeSubfolders') === 'true';
 
-    // 并行执行书签总数查询和当前书签查询
-    const [totalBookmarks, currentBookmarks] = await Promise.all([
-      prisma.bookmark.count({
-        where: {
-          collectionId: id,
-        }
-      }),
-      prisma.bookmark.findMany({
-        where: {
-          collectionId: id,
-          ...(folderId ? { folderId } : { folderId: null })
-        },
-        orderBy: {
-          [sortField]: sortOrder as 'asc' | 'desc',
-        },
-        include: {
-          collection: {
-            select: {
-              name: true,
-            },
-          },
-          folder: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      })
-    ]);
-
-    // 获取子文件夹及其内容
-    const subfolders = await Promise.all(
-      (await prisma.folder.findMany({
-        where: {
-          collectionId: id,
-          parentId: folderId || null
-        },
-        orderBy: {
-          [sortField]: sortOrder as 'asc' | 'desc',
-        },
-      })).map(async (folder) => {
-        // 并行获取文件夹内的书签、子文件夹和总书签数
-        const [bookmarks, childFolders, bookmarkCount] = await Promise.all([
-          prisma.bookmark.findMany({
-            where: {
-              folderId: folder.id
-            },
-            ...(pageSize ? { take: pageSize } : {}),
-            orderBy: {
-              [sortField]: sortOrder as 'asc' | 'desc',
-            }
-          }),
-          prisma.folder.findMany({
-            where: {
-              parentId: folder.id
-            },
-            orderBy: {
-              [sortField]: sortOrder as 'asc' | 'desc',
-            },
-          }),
-          prisma.bookmark.count({
-            where: {
-              folderId: folder.id
-            }
-          })
-        ]);
+    // 获取当前文件夹的书签
+    const currentBookmarksData = dataService.getBookmarks(id, folderId);
+    
+    // 如果需要包含子文件夹
+    let subfolders: any[] = [];
+    if (includeSubfolders) {
+      const folders = dataService.getFoldersByCollection(id, folderId);
+      
+      subfolders = folders.map(folder => {
+        // 获取文件夹内的直接书签
+        const folderBookmarks = dataService.getBookmarks(id, folder.id);
+        
+        // 获取子文件夹
+        const childFolders = dataService.getFoldersByCollection(id, folder.id);
+        
+        // 组合项目（文件夹在前，书签在后）
+        const items = [
+          ...childFolders.map(f => ({
+            type: 'folder' as const,
+            id: f.id,
+            name: f.name,
+            icon: f.icon
+          })),
+          ...folderBookmarks.map(b => ({
+            type: 'bookmark' as const,
+            id: b.id,
+            title: b.title,
+            url: b.url,
+            description: b.description,
+            icon: b.icon,
+            isFeatured: b.isFeatured
+          }))
+        ];
 
         return {
-          ...folder,
-          items: [
-            ...childFolders.map(f => ({ ...f, type: 'folder' as const })),
-            ...bookmarks.map(b => ({ ...b, type: 'bookmark' as const }))
-          ],
-          bookmarkCount
+          id: folder.id,
+          name: folder.name,
+          icon: folder.icon,
+          items: items.slice(0, 50), // 限制显示数量
+          totalBookmarks: folderBookmarks.length,
+          bookmarkCount: folderBookmarks.length
         };
-      })
-    );
+      });
+    }
 
     return NextResponse.json({
-      currentBookmarks,
-      subfolders,
+      currentBookmarks: currentBookmarksData,
+      subfolders
     });
-
   } catch (error) {
-    console.error("Failed to get content:", error);
+    console.error('获取书签数据失败:', error);
     return NextResponse.json(
-      { error: "Failed to get content", details: error instanceof Error ? error.message : "Unknown error" },
+      { error: "Failed to get bookmarks" },
       { status: 500 }
     );
   }

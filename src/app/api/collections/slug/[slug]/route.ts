@@ -1,21 +1,16 @@
-import { prisma } from "@/lib/prisma";
+import { dataService } from "@/lib/data";
 import { NextResponse } from "next/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = await Promise.resolve(params);
+    const { slug } = await params;
     
-    const collection = await prisma.collection.findFirst({
-      where: {
-        slug,
-        isPublic: true
-      }
-    });
+    const collection = dataService.getCollectionBySlug(slug);
 
-    if (!collection) {
+    if (!collection || !collection.isPublic) {
       return NextResponse.json(
         { error: "Collection not found" },
         { status: 404 }

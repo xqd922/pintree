@@ -126,7 +126,6 @@ export function BookmarkGrid({
       }
 
       const data = await response.json();
-      console.log("Received data:", data);
       setCurrentBookmarks(data.currentBookmarks || []);
       setSubfolders(data.subfolders || []);
 
@@ -152,7 +151,6 @@ export function BookmarkGrid({
   // 监听路由参数和刷新触发器变化
   useEffect(() => {
     if (collectionId) {
-      console.log("Fetching data with:", { collectionId, currentFolderId });
       fetchBookmarkData(currentFolderId);
     }
   }, [collectionId, currentFolderId, refreshTrigger]); 

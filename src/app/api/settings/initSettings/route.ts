@@ -1,18 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { updateSettingsWithDefaults } from '@/actions/init-settings';
-
-
-// 增加超时时间到最大值
-export const maxDuration = 60; // Vercel Hobby 允许的最大时间是 60 秒
-export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    // 调用初始化设置的服务器操作
-    await updateSettingsWithDefaults();
-
+    // JSON 文件模式下，设置已经在 JSON 文件中定义，无需初始化
     return NextResponse.json({ 
-      message: 'Settings initialized successfully',
+      message: 'JSON 文件模式下，设置已在 data/bookmarks.json 中定义',
       status: 'success' 
     }, { status: 200 });
   } catch (error) {

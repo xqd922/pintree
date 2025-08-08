@@ -1,49 +1,25 @@
-import { prisma } from "@/lib/prisma";
+import { dataService } from "@/lib/data";
 import { NextResponse } from "next/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string; folderId: string } }
+  { params }: { params: Promise<{ id: string; folderId: string }> }
 ) {
   try {
-    // 等待参数解析
-    const { id, folderId } = await Promise.resolve(params);
+    const { folderId } = await params;
     
-    // 验证参数
-    if (!id || !folderId) {
-      return NextResponse.json(
-        { error: "Missing required parameters" },
-        { status: 400 }
-      );
-    }
+    // 获取文件夹路径（面包屑导航）
+    const path = dataService.getFolderPath(folderId);
+    
+    // 转换为前端需要的格式
+    const breadcrumbs = path.map(folder => ({
+      id: folder.id,
+      name: folder.name
+    }));
 
-    const path = [];
-    let currentFolder = await prisma.folder.findUnique({
-      where: { 
-        id: folderId,
-        collectionId: id // 确保文件夹属于正确的集合
-      }
-    });
-
-    while (currentFolder) {
-      path.unshift({
-        id: currentFolder.id,
-        name: currentFolder.name
-      });
-      
-      if (!currentFolder.parentId) break;
-      
-      currentFolder = await prisma.folder.findUnique({
-        where: { 
-          id: currentFolder.parentId,
-          collectionId: id
-        }
-      });
-    }
-
-    return NextResponse.json(path);
+    return NextResponse.json(breadcrumbs);
   } catch (error) {
-    console.error("Failed to get folder path:", error);
+    console.error('获取文件夹路径失败:', error);
     return NextResponse.json(
       { error: "Failed to get folder path" },
       { status: 500 }

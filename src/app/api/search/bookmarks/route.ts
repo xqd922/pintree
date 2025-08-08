@@ -1,105 +1,46 @@
-export const dynamic = 'force-dynamic';
-
-import { prisma } from "@/lib/prisma";
+import { dataService } from "@/lib/data";
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/options";
-
-function getSearchWhereClause(query: string, scope: string, collectionId: string | null, isAuthenticated: boolean) {
-  const baseConditions = {
-    OR: [
-      { title: { contains: query, mode: 'insensitive' as const } },
-      { description: { contains: query, mode: 'insensitive' as const } },
-      { url: { contains: query, mode: 'insensitive' as const } }
-    ]
-  };
-
-  if (scope === 'current' && collectionId) {
-    return {
-      AND: [
-        baseConditions,
-        { collectionId: collectionId }
-      ]
-    };
-  }
-
-  if (scope === 'all') {
-    if (isAuthenticated) {
-      return baseConditions;
-    } else {
-      return {
-        AND: [
-          baseConditions,
-          { collection: { isPublic: true } }
-        ]
-      };
-    }
-  }
-
-  return {
-    AND: [
-      baseConditions,
-      { id: 'none' }
-    ]
-  };
-}
 
 export async function GET(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
     const { searchParams } = new URL(request.url);
-    
-    const query = searchParams.get("q");
-    const scope = searchParams.get("scope") || "all";
-    const collectionId = searchParams.get("collectionId");
-    const page = parseInt(searchParams.get("page") || "1");
-    const pageSize = parseInt(searchParams.get("pageSize") || "100");
-    const skip = (page - 1) * pageSize;
+    const query = searchParams.get('q') || '';
+    const scope = searchParams.get('scope') || 'all';
+    const collectionId = searchParams.get('collectionId');
+    const page = parseInt(searchParams.get('page') || '1');
+    const pageSize = parseInt(searchParams.get('pageSize') || '20');
 
-    if (!query) {
-      return NextResponse.json({ bookmarks: [], total: 0 });
+    if (!query.trim()) {
+      return NextResponse.json({
+        bookmarks: [],
+        total: 0,
+        page,
+        pageSize
+      });
     }
 
-    const whereClause = getSearchWhereClause(query, scope, collectionId, !!session);
+    // 执行搜索
+    let searchResults = dataService.searchBookmarks(
+      query,
+      scope === 'current' ? collectionId || undefined : undefined
+    );
 
-    const [total, bookmarks] = await Promise.all([
-      prisma.bookmark.count({
-        where: whereClause
-      }),
-      prisma.bookmark.findMany({
-        where: whereClause,
-        skip,
-        take: pageSize,
-        include: {
-          collection: {
-            select: {
-              name: true,
-              slug: true,
-              isPublic: true
-            }
-          },
-          folder: {
-            select: {
-              name: true
-            }
-          }
-        },
-        orderBy: {
-          updatedAt: 'desc'
-        }
-      })
-    ]);
+    // 分页处理
+    const total = searchResults.length;
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedResults = searchResults.slice(startIndex, endIndex);
 
-    return NextResponse.json({ 
-      bookmarks, 
+    return NextResponse.json({
+      bookmarks: paginatedResults,
       total,
-      currentPage: page,
-      totalPages: Math.ceil(total / pageSize)
+      page,
+      pageSize
     });
   } catch (error) {
-    console.error("Search bookmarks failed:", error);
+    console.error('搜索失败:', error);
     return NextResponse.json(
-      { error: "Search bookmarks failed" },
+      { error: "Search failed" },
       { status: 500 }
     );
   }

@@ -1,40 +1,50 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { toast, Toaster } from "sonner";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { AdminHeader } from "@/components/admin/header";
-import { revalidateData } from "@/actions/revalidate-data";
-const defaultSettings = {
-  // websiteName: "",
-  description: "",
-  keywords: "",
-  siteUrl: "",
-};
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, FileText, ExternalLink } from "lucide-react";
 
-
-export default function SeoSettingsPage() {
+export default function SEOSettingsPage() {
+  const [settings, setSettings] = useState({
+    websiteName: "",
+    description: "",
+    keywords: "",
+    siteUrl: "",
+  });
   const [loading, setLoading] = useState(false);
-  const [settings, setSettings] = useState(defaultSettings);
 
+  // 加载设置数据
   useEffect(() => {
     const loadSettings = async () => {
       setLoading(true);
       try {
-        const response = await fetch('/api/settings?group=seo');
+        const response = await fetch("/api/settings");
         if (!response.ok) {
-          throw new Error('Failed to load settings');
+          throw new Error("Failed to load settings");
         }
         const data = await response.json();
-        setSettings(prev => ({
-          ...prev,
-          ...data
-        }));
+        setSettings({
+          websiteName: data.websiteName || "",
+          description: data.description || "",
+          keywords: data.keywords || "",
+          siteUrl: data.siteUrl || "",
+        });
       } catch (error) {
+        console.error("Load settings error:", error);
         toast.error("Failed to load settings");
       } finally {
         setLoading(false);
@@ -44,171 +54,124 @@ export default function SeoSettingsPage() {
     loadSettings();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setSettings(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // 验证网站 URL 格式
-    try {
-      if (settings.siteUrl) {
-        // 去除首尾空格和多余斜杠
-        const cleanUrl = settings.siteUrl.trim().replace(/\/+$/, '');
-        
-        const url = new URL(cleanUrl);
-        if (!url.protocol.startsWith('http')) {
-          throw new Error('Website URL must start with http:// or https://');
-        }
-        
-        // 验证域名格式
-        const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
-        if (!domainRegex.test(url.hostname)) {
-          throw new Error('Please enter a valid domain');
-        }
-
-        // 更新为清理后的 URL
-        settings.siteUrl = cleanUrl;
-      } else {
-        throw new Error('Please enter website URL');
-      }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Website URL format is incorrect');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const saveSettingPromises = [];
-
-
-
-      // 添加基本设置保存到 saveSettingPromises
-      saveSettingPromises.push(
-        fetch("/api/settings", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...settings,
-            group: 'seo'
-          }),
-        }).then(async response => {
-          if (!response.ok) {
-            const errorData = await response.json();
-            console.error("API error response:", errorData);
-            throw new Error(errorData.error || "Save failed");
-          }
-          return response.json();
-        }).then(result => {
-          console.log("Save success:", result); // 调试日志
-        })
-      );
-
-      // 并行处理所有操作
-      await Promise.all(saveSettingPromises);
-
-      revalidateData();
-
-      toast.success("SEO settings saved");
-    } catch (error) {
-      console.error('Failed to save settings:', error);
-      toast.error(error instanceof Error ? error.message : "Failed to save settings");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="h-full bg-[#f9f9f9]">
-      <Toaster />
-      <AdminHeader title="SEO Settings" />
+      <AdminHeader title="SEO Settings (JSON Mode)" />
 
       <div className="mx-auto px-4 py-12 bg-[#f9f9f9]">
-        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto space-y-8">
-          <div className="space-y-8">
-            {/* SEO 设置 */}
-            <div className="space-y-4">
-              <div className="space-y-4">
-                {/* 基础 SEO */}
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground font-normal">Basic SEO</p>
-                  <Card className="border bg-white">
-                    <CardContent className="grid gap-4 p-6">
-                      <div className="grid gap-2">
-                        <label htmlFor="siteUrl" className="font-medium">
-                          Website URL
-                        </label>
-                        <Input
-                          id="siteUrl"
-                          name="siteUrl"
-                          value={settings.siteUrl}
-                          onChange={handleChange}
-                          placeholder="Enter website full URL"
-                        />
-                        <p className="text-sm text-muted-foreground">
-                          For example: https://pintree.io
-                        </p>
-                      </div>
+        <div className="max-w-3xl mx-auto space-y-8">
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              当前运行在 JSON 文件模式下。要修改 SEO 设置，请直接编辑 <code>data/bookmarks.json</code> 文件中的 <code>settings</code> 部分。
+            </AlertDescription>
+          </Alert>
 
-                      {/* <div className="grid gap-2">
-                        <label htmlFor="websiteName" className="font-medium">
-                          Website Title
-                        </label>
-                        <Input
-                          id="websiteName"
-                          name="websiteName"
-                          value={settings.websiteName}
-                          onChange={handleChange}
-                          placeholder="Enter website title"
-                        />
-                      </div> */}
-
-                      <div className="grid gap-2">
-                        <label htmlFor="description" className="font-medium">
-                          Website Description
-                        </label>
-                        <Textarea
-                          id="description"
-                          name="description"
-                          value={settings.description}
-                          onChange={handleChange}
-                          placeholder="Enter website description"
-                          rows={3}
-                        />
-                      </div>
-
-                      <div className="grid gap-2">
-                        <label htmlFor="keywords" className="font-medium">
-                          Keywords
-                        </label>
-                        <Input
-                          id="keywords"
-                          name="keywords"
-                          value={settings.keywords}
-                          onChange={handleChange}
-                          placeholder="Enter keywords, separated by commas"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-
+          <Card className="border bg-white">
+            <CardHeader className="border-b">
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                当前 SEO 设置
+              </CardTitle>
+              <CardDescription>
+                以下是从 JSON 文件中读取的当前 SEO 设置（只读模式）
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 p-6">
+              <div className="grid gap-2">
+                <Label htmlFor="websiteName">网站标题</Label>
+                <Input
+                  id="websiteName"
+                  value={settings.websiteName}
+                  placeholder="网站标题"
+                  disabled
+                />
+                <p className="text-sm text-muted-foreground">
+                  显示在浏览器标签页和搜索结果中的标题
+                </p>
               </div>
-            </div>
-          </div>
 
-          <div className="flex justify-end">
-            <Button type="submit" disabled={loading}>
-              {loading ? "Saving..." : "Save Settings"}
-            </Button>
-          </div>
-        </form>
+              <div className="grid gap-2">
+                <Label htmlFor="description">网站描述</Label>
+                <Textarea
+                  id="description"
+                  value={settings.description}
+                  placeholder="网站描述"
+                  disabled
+                  rows={3}
+                />
+                <p className="text-sm text-muted-foreground">
+                  显示在搜索结果中的网站描述，建议 150-160 字符
+                </p>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="keywords">关键词</Label>
+                <Input
+                  id="keywords"
+                  value={settings.keywords}
+                  placeholder="关键词1,关键词2,关键词3"
+                  disabled
+                />
+                <p className="text-sm text-muted-foreground">
+                  用逗号分隔的关键词，有助于搜索引擎理解网站内容
+                </p>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="siteUrl">网站 URL</Label>
+                <Input
+                  id="siteUrl"
+                  value={settings.siteUrl}
+                  placeholder="https://your-domain.com"
+                  disabled
+                />
+                <p className="text-sm text-muted-foreground">
+                  网站的完整 URL，用于生成规范链接和 sitemap
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border bg-white">
+            <CardHeader className="border-b">
+              <CardTitle>SEO 优化建议</CardTitle>
+              <CardDescription>
+                提升网站搜索引擎排名的建议
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              <div className="space-y-2">
+                <h4 className="font-medium">✅ 已优化项目</h4>
+                <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                  <li>• 动态生成页面标题和描述</li>
+                  <li>• 响应式设计，移动端友好</li>
+                  <li>• 语义化 HTML 结构</li>
+                  <li>• 快速加载速度</li>
+                </ul>
+              </div>
+              
+              <div className="space-y-2">
+                <h4 className="font-medium">💡 优化建议</h4>
+                <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                  <li>• 定期更新书签内容</li>
+                  <li>• 使用描述性的书签标题</li>
+                  <li>• 合理组织文件夹结构</li>
+                  <li>• 添加相关的标签</li>
+                </ul>
+              </div>
+
+              <div className="pt-4">
+                <Button variant="outline" asChild>
+                  <a href="/README-JSON.md" target="_blank">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    查看完整文档
+                  </a>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
