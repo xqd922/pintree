@@ -18,6 +18,11 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Prisma related (to avoid auto-detection)
+prisma/
+*.prisma
+migrations/
+
 # Runtime data
 pids
 *.pid

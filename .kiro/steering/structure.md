@@ -60,7 +60,7 @@ src/components/
 src/lib/
 ├── auth/                  # Authentication utilities
 ├── utils/                 # Helper functions
-├── prisma.ts              # Database client
+├── data.ts                # JSON data access layer
 ├── utils.ts               # General utilities
 └── defaultSettings.ts     # Default configuration
 ```
