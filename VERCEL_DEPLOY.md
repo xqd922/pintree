@@ -62,10 +62,10 @@ NEXT_PUBLIC_APP_URL=https://your-domain.vercel.app
 - 环境变量是否正确设置
 
 ### 问题 4: 数据文件问题
-确保 `data/bookmarks.json` 文件：
+确保 `data/pintree.json` 文件：
 - 存在于项目根目录
 - JSON 格式正确
-- 包含必要的数据结构
+- 包含浏览器书签格式或 Pintree 格式的数据
 
 ### 问题 5: API 路由错误
 如果 API 路由不工作：

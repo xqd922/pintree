@@ -35,7 +35,6 @@
       "id": "bookmark-1",
       "title": "GitHub",
       "url": "https://github.com",
-      "description": "全球最大的代码托管平台",
       "icon": "https://github.com/favicon.ico",
       "collectionId": "default",
       "folderId": "folder-1",

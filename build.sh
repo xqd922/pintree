@@ -4,8 +4,8 @@
 echo "🚀 开始构建 Pintree (JSON 模式)..."
 
 # 检查数据文件是否存在
-if [ ! -f "data/bookmarks.json" ]; then
-    echo "❌ 错误: data/bookmarks.json 文件不存在"
+if [ ! -f "data/pintree.json" ]; then
+    echo "❌ 错误: data/pintree.json 文件不存在"
     exit 1
 fi
 

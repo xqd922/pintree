@@ -55,7 +55,92 @@ export interface DataStructure {
 }
 
 // 数据文件路径
-const DATA_FILE_PATH = path.join(process.cwd(), 'data', 'bookmarks.json');
+const DATA_FILE_PATH = path.join(process.cwd(), 'data', 'pintree.json');
+
+// 浏览器书签项目类型
+interface BrowserBookmarkItem {
+  type: 'folder' | 'link';
+  title: string;
+  url?: string;
+  icon?: string;
+  addDate?: number;
+  children?: BrowserBookmarkItem[];
+}
+
+// 转换浏览器书签格式为 Pintree 格式
+function convertBrowserBookmarks(browserData: BrowserBookmarkItem[]): DataStructure {
+  const collections: Collection[] = [];
+  const folders: Folder[] = [];
+  const bookmarks: Bookmark[] = [];
+  
+  let collectionId = 'default';
+  let folderIdCounter = 1;
+  let bookmarkIdCounter = 1;
+  
+  // 创建默认集合
+  collections.push({
+    id: collectionId,
+    name: '我的书签',
+    slug: 'my-bookmarks',
+    description: '从浏览器导入的书签',
+    icon: '📚',
+    isPublic: true,
+    viewStyle: 'grid',
+    sortStyle: 'alpha',
+    sortOrder: 0
+  });
+  
+  function processItems(items: BrowserBookmarkItem[], parentId: string | null = null, sortOrder = 0) {
+    items.forEach((item, index) => {
+      if (item.type === 'folder' && item.children) {
+        const folderId = `folder-${folderIdCounter++}`;
+        folders.push({
+          id: folderId,
+          name: item.title,
+          icon: '📁',
+          collectionId,
+          parentId,
+          sortOrder: index
+        });
+        
+        // 递归处理子项目
+        processItems(item.children, folderId);
+      } else if (item.type === 'link' && item.url) {
+        bookmarks.push({
+          id: `bookmark-${bookmarkIdCounter++}`,
+          title: item.title,
+          url: item.url,
+          description: '',
+          icon: item.icon || `https://www.google.com/s2/favicons?domain=${new URL(item.url).hostname}`,
+          collectionId,
+          folderId: parentId,
+          tags: [],
+          isFeatured: false,
+          sortOrder: index
+        });
+      }
+    });
+  }
+  
+  // 处理根级别的项目
+  processItems(browserData);
+  
+  return {
+    collections,
+    folders,
+    bookmarks,
+    settings: {
+      websiteName: "Pintree - 我的书签导航",
+      description: "个人书签导航网站",
+      keywords: "书签,导航,工具",
+      siteUrl: "http://localhost:3000",
+      faviconUrl: "/favicon.ico",
+      logoUrl: "/logo.png",
+      enableSearch: true,
+      theme: "light"
+    }
+  };
+}
 
 // 读取数据
 export function loadData(): DataStructure {
@@ -80,7 +165,16 @@ export function loadData(): DataStructure {
     }
 
     const fileContent = fs.readFileSync(DATA_FILE_PATH, 'utf-8');
-    return JSON.parse(fileContent);
+    const rawData = JSON.parse(fileContent);
+    
+    // 检查是否是浏览器书签格式
+    if (Array.isArray(rawData) && rawData.length > 0 && rawData[0].type) {
+      // 转换浏览器书签格式
+      return convertBrowserBookmarks(rawData);
+    } else {
+      // 假设是 Pintree 格式
+      return rawData as DataStructure;
+    }
   } catch (error) {
     console.error('读取数据文件失败:', error);
     throw new Error('无法加载数据文件');

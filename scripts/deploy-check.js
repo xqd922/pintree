@@ -23,8 +23,8 @@ const checks = [
   },
   {
     name: '检查数据文件',
-    check: () => fs.existsSync('data/bookmarks.json'),
-    fix: '确保 data/bookmarks.json 文件存在'
+    check: () => fs.existsSync('data/pintree.json'),
+    fix: '确保 data/pintree.json 文件存在'
   },
   {
     name: '检查 Next.js 配置',
@@ -45,13 +45,14 @@ const checks = [
     name: '检查数据文件格式',
     check: () => {
       try {
-        const data = JSON.parse(fs.readFileSync('data/bookmarks.json', 'utf-8'));
-        return data.collections && data.bookmarks && data.settings;
+        const data = JSON.parse(fs.readFileSync('data/pintree.json', 'utf-8'));
+        // 检查是否是浏览器书签格式或 Pintree 格式
+        return Array.isArray(data) || (data.collections && data.bookmarks && data.settings);
       } catch {
         return false;
       }
     },
-    fix: '确保 data/bookmarks.json 包含 collections, bookmarks, settings 字段'
+    fix: '确保 data/pintree.json 是有效的 JSON 格式（浏览器书签或 Pintree 格式）'
   }
 ];
 
