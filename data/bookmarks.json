@@ -22,7 +22,7 @@
       "sortOrder": 0
     },
     {
-      "id": "folder-2", 
+      "id": "folder-2",
       "name": "设计资源",
       "icon": "🎨",
       "collectionId": "default",
@@ -39,7 +39,10 @@
       "icon": "https://github.com/favicon.ico",
       "collectionId": "default",
       "folderId": "folder-1",
-      "tags": ["开发", "代码"],
+      "tags": [
+        "开发",
+        "代码"
+      ],
       "isFeatured": true,
       "sortOrder": 0
     },
@@ -49,9 +52,12 @@
       "url": "https://figma.com",
       "description": "协作设计工具",
       "icon": "https://figma.com/favicon.ico",
-      "collectionId": "default", 
+      "collectionId": "default",
       "folderId": "folder-2",
-      "tags": ["设计", "UI"],
+      "tags": [
+        "设计",
+        "UI"
+      ],
       "isFeatured": false,
       "sortOrder": 0
     }

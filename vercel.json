@@ -1,5 +1,14 @@
 {
-  "buildCommand": "prisma generate && prisma db push && next build",
-  "installCommand": "npm install",
-  "framework": "nextjs"
+  "buildCommand": "pnpm run build",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "env": {
+    "PNPM_FLAGS": "--shamefully-hoist"
+  }
 }
