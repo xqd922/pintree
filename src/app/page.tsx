@@ -11,8 +11,7 @@ import { Footer } from "@/components/website/footer";
 
 import { GetStarted } from "@/components/website/get-started";
 import { BackToTop } from "@/components/website/back-to-top";
-
-import { Collection } from "@prisma/client";
+import { Collection } from "@/lib/data";
 
 function SearchParamsComponent() {
   const pathname = usePathname();
