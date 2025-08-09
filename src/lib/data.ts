@@ -80,9 +80,9 @@ function convertBrowserBookmarks(browserData: BrowserBookmarkItem[]): DataStruct
   // 创建默认集合
   collections.push({
     id: collectionId,
-    name: '我的书签',
-    slug: 'my-bookmarks',
-    description: '从浏览器导入的书签',
+    name: '书签栏',
+    slug: 'me',
+    description: '属于自己的书签',
     icon: '📚',
     isPublic: true,
     viewStyle: 'grid',
