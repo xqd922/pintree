@@ -7,6 +7,7 @@ import { Analytics } from "@/components/analytics/Analytics";
 import { Toaster as SonnerToaster } from "sonner";
 import type { Metadata, ResolvingMetadata } from 'next'
 import { GoogleAnalytics } from '@next/third-parties/google'
+import { EnvironmentInfo } from "@/components/debug/EnvironmentInfo";
 
 type Props = {
   params: Promise<{ id: string }>
@@ -88,6 +89,7 @@ export default async function RootLayout({
         <SessionProvider>{children}</SessionProvider>
         <Toaster />
         <SonnerToaster />
+        <EnvironmentInfo />
       </body>
       <Analytics clarityId={analyticsMap.clarityId} />
       {!!analyticsMap.googleAnalyticsId && <GoogleAnalytics gaId={analyticsMap.googleAnalyticsId} />}

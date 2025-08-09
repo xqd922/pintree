@@ -1,13 +1,14 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/common/Input";
 import { Button } from "@/components/common/Button";
 import { useRouter } from "next/navigation";
 import { Github, Twitter } from "lucide-react";
 import Image from "next/image";
 import { revalidateData } from "@/actions/revalidate-data";
+import { isLocalEnvironment } from "@/lib/env";
 
 
 export default function LoginPage() {
@@ -16,6 +17,17 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [initializeDatabase, setInitializeDatabase] = useState(true);
+  const [isLocal, setIsLocal] = useState(false);
+
+  useEffect(() => {
+    const localEnv = isLocalEnvironment();
+    setIsLocal(localEnv);
+    
+    // 如果不是本地环境，重定向到首页
+    if (!localEnv) {
+      router.push('/');
+    }
+  }, [router]);
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
@@ -74,6 +86,18 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // 如果不是本地环境，显示加载状态或不渲染
+  if (!isLocal) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Redirecting...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

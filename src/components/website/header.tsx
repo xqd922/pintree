@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import CreateBookmarkDialogGlobal from "@/components/bookmark/CreateBookmarkDialogGlobal";
 import {  useSearchParams, useRouter, usePathname } from "next/navigation";
+import { isLocalEnvironment } from "@/lib/env";
 
 
 interface Collection {
@@ -37,6 +38,12 @@ export function Header({
   const searchParams = useSearchParams();
   const { data: session } = useSession();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [showAdminButton, setShowAdminButton] = useState(false);
+
+  // 检查是否为本地环境
+  useEffect(() => {
+    setShowAdminButton(isLocalEnvironment());
+  }, []);
 
   const handleSuccess = async (newBookmarkFolderId?: string) => {
     setDialogOpen(false);
@@ -79,11 +86,13 @@ export function Header({
             </Button>
           </>
         )}
-        <Button asChild variant="outline" size="sm">
-          <Link href="/admin/collections" aria-label="Admin">
-            <Settings className="h-4 w-4" />
-          </Link>
-        </Button>
+        {showAdminButton && (
+          <Button asChild variant="outline" size="sm">
+            <Link href="/admin/collections" aria-label="Admin">
+              <Settings className="h-4 w-4" />
+            </Link>
+          </Button>
+        )}
       </div>
 
       <CreateBookmarkDialogGlobal
