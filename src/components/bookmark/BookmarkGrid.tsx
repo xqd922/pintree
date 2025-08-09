@@ -235,19 +235,25 @@ export function BookmarkGrid({
   //   });
   // }, [subfolders]);
 
-  // 加载搜索设置的副作用钩子
+  // 优化搜索设置加载 - 异步加载，不阻塞搜索框显示
   useEffect(() => {
     const loadSearchSetting = async () => {
       try {
         const response = await fetch('/api/settings?group=feature');
         const data = await response.json();
-        setEnableSearch(data.enableSearch === 'true' || data.enableSearch === true);
+        const searchEnabled = data.enableSearch === 'true' || data.enableSearch === true;
+        // 只有当设置为 false 时才更新状态，默认为 true
+        if (!searchEnabled) {
+          setEnableSearch(false);
+        }
       } catch (error) {
         console.error('Load search settings failed:', error);
+        // 出错时保持默认启用状态
       }
     };
     
-    loadSearchSetting();
+    // 使用 setTimeout 0 让搜索框先渲染，然后异步加载设置
+    setTimeout(loadSearchSetting, 0);
   }, []);
 
   // 如果没有集合ID，显示加载状态
@@ -263,10 +269,17 @@ export function BookmarkGrid({
   if (loading) {
     return (
       <div className="px-6 space-y-6">
-        {/* 搜索栏骨架屏 - 添加条件渲染 */}
+        {/* 搜索栏 - 加载时也显示真实搜索框 */}
         {enableSearch && (
-          <div className="flex justify-center mt-4 mb-12">
-            <Skeleton className="h-12 w-[600px] rounded-full" />
+          <div className="flex justify-center mt-4 mb-12 animate-in fade-in-0 slide-in-from-top-2 duration-200">
+            <SearchBar
+              placeholder="Search bookmarks..."
+              onSearch={performBookmarkSearch}
+              currentEngine={currentEngine}
+              onEngineChange={setCurrentEngine}
+              currentCollection={searchScope}
+              onCollectionChange={(scope) => setSearchScope(scope as 'all' | 'current')}
+            />
           </div>
         )}
 
@@ -289,9 +302,9 @@ export function BookmarkGrid({
   // 渲染主组件
   return (
     <div className="px-6 space-y-6">
-      {/* 搜索栏 - 添加条件渲染 */}
+      {/* 搜索栏 - 优化加载显示 */}
       {enableSearch && (
-        <div className="flex justify-center mt-4 mb-12">
+        <div className="flex justify-center mt-4 mb-12 animate-in fade-in-0 slide-in-from-top-2 duration-200">
           <SearchBar
             placeholder="Search bookmarks..."
             onSearch={performBookmarkSearch}
