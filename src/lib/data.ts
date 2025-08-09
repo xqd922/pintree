@@ -141,10 +141,10 @@ function convertBrowserBookmarks(browserData: BrowserBookmarkItem[]): DataStruct
     folders,
     bookmarks,
     settings: {
-      websiteName: "Pintree - 我的书签导航",
+      websiteName: "Pintree",
       description: "个人书签导航网站",
       keywords: "书签,导航,工具",
-      siteUrl: "http://localhost:3000",
+      siteUrl: "https://tree.xqd.pp.ua",
       faviconUrl: "/favicon/favicon.ico",
       logoUrl: "/logo.png",
       enableSearch: true,
