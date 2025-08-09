@@ -33,11 +33,13 @@ export const generateMetadata = async (
       icons: {
         icon: [
           {
-            url: settings.faviconUrl,
+            url: settings.faviconUrl || "/favicon/favicon.ico",
             sizes: "32x32",
             type: "image/x-icon",
           },
         ],
+        shortcut: "/favicon/favicon.ico",
+        apple: "/favicon/favicon.ico",
       },
     };
   } catch (error) {
@@ -49,7 +51,15 @@ export const generateMetadata = async (
       keywords:
         "bookmark manager, bookmark organizer, bookmark collections, bookmark sharing, productivity tools, website organization, link management, bookmark tags, AI bookmarking, digital organization",
       icons: {
-        icon: "/favicon/favicon.ico",
+        icon: [
+          {
+            url: "/favicon/favicon.ico",
+            sizes: "32x32",
+            type: "image/x-icon",
+          },
+        ],
+        shortcut: "/favicon/favicon.ico",
+        apple: "/favicon/favicon.ico",
       },
     };
   }
@@ -68,6 +78,12 @@ export default async function RootLayout({
 
   return (
     <html lang="zh-CN" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicon/favicon.ico" type="image/x-icon" />
+        <link rel="shortcut icon" href="/favicon/favicon.ico" />
+        <link rel="apple-touch-icon" href="/favicon/favicon.ico" />
+      </head>
       <body suppressHydrationWarning>
         <SessionProvider>{children}</SessionProvider>
         <Toaster />

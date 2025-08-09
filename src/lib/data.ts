@@ -145,7 +145,7 @@ function convertBrowserBookmarks(browserData: BrowserBookmarkItem[]): DataStruct
       description: "个人书签导航网站",
       keywords: "书签,导航,工具",
       siteUrl: "http://localhost:3000",
-      faviconUrl: "/favicon.ico",
+      faviconUrl: "/favicon/favicon.ico",
       logoUrl: "/logo.png",
       enableSearch: true,
       theme: "light"
@@ -167,7 +167,7 @@ export function loadData(): DataStructure {
           description: "书签导航网站",
           keywords: "书签,导航",
           siteUrl: "http://localhost:3000",
-          faviconUrl: "/favicon.ico",
+          faviconUrl: "/favicon/favicon.ico",
           logoUrl: "/logo.png",
           enableSearch: true,
           theme: "light"
