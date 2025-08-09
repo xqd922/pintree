@@ -12,6 +12,7 @@ import { Footer } from "@/components/website/footer";
 import { GetStarted } from "@/components/website/get-started";
 import { BackToTop } from "@/components/website/back-to-top";
 import { Collection } from "@/lib/data";
+import { PageSkeleton } from "@/components/common/PageSkeleton";
 
 function SearchParamsComponent() {
   const pathname = usePathname();
@@ -153,7 +154,7 @@ function SearchParamsComponent() {
 
 export default function Page() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<PageSkeleton />}>
       <SearchParamsComponent />
     </Suspense>
   );
