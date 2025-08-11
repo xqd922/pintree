@@ -1,5 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import { PerformanceMonitor, logMemoryUsage } from './performance';
+import { iconOptimizer } from './icon-optimizer';
 
 // 数据类型定义
 export interface Collection {
@@ -209,20 +211,155 @@ export function saveData(data: DataStructure): void {
 
 // 数据查询函数
 export class DataService {
-  private data: DataStructure;
+  private data: DataStructure | null = null;
+  private lastModified: number = 0;
+  private isLoading: boolean = false;
+  
+  // 索引缓存
+  private bookmarksByCollection: Map<string, Bookmark[]> = new Map();
+  private bookmarksByFolder: Map<string, Bookmark[]> = new Map();
+  private foldersByCollection: Map<string, Folder[]> = new Map();
+  private searchIndex: Map<string, Bookmark[]> = new Map();
 
   constructor() {
-    this.data = loadData();
+    this.loadDataWithCache();
+  }
+
+  // 带缓存的数据加载
+  private loadDataWithCache() {
+    if (this.isLoading) return;
+    
+    try {
+      this.isLoading = true;
+      const stats = fs.statSync(DATA_FILE_PATH);
+      const fileModified = stats.mtime.getTime();
+      
+      // 只有文件更新时才重新加载
+      if (!this.data || fileModified > this.lastModified) {
+        console.log('📁 Loading data from file...');
+        logMemoryUsage('Before loading data');
+        
+        this.data = PerformanceMonitor.measure('Load JSON data', () => {
+          return loadData();
+        });
+        
+        // 重建索引
+        PerformanceMonitor.measure('Build indexes', () => {
+          this.buildIndexes();
+        });
+        
+        this.lastModified = fileModified;
+        logMemoryUsage('After loading data');
+        
+        // 统计数据量
+        if (this.data) {
+          console.log('📊 Data loaded:', {
+            collections: this.data.collections.length,
+            folders: this.data.folders.length,
+            bookmarks: this.data.bookmarks.length
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load data:', error);
+      if (!this.data) {
+        this.data = this.getDefaultData();
+      }
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  private getDefaultData(): DataStructure {
+    return {
+      collections: [],
+      folders: [],
+      bookmarks: [],
+      settings: {
+        websiteName: "Pintree",
+        description: "书签导航网站",
+        keywords: "书签,导航",
+        siteUrl: "http://localhost:3000",
+        faviconUrl: "/favicon/favicon.ico",
+        logoUrl: "/logo.png",
+        enableSearch: true,
+        theme: "light"
+      }
+    };
+  }
+
+  // 构建索引以提高查询性能
+  private buildIndexes() {
+    if (!this.data) return;
+    
+    // 清空现有索引
+    this.bookmarksByCollection.clear();
+    this.bookmarksByFolder.clear();
+    this.foldersByCollection.clear();
+    this.searchIndex.clear();
+    
+    // 按集合分组书签
+    this.data.bookmarks.forEach(bookmark => {
+      const collectionKey = bookmark.collectionId;
+      if (!this.bookmarksByCollection.has(collectionKey)) {
+        this.bookmarksByCollection.set(collectionKey, []);
+      }
+      this.bookmarksByCollection.get(collectionKey)!.push(bookmark);
+      
+      // 按文件夹分组书签
+      const folderKey = `${bookmark.collectionId}:${bookmark.folderId || 'root'}`;
+      if (!this.bookmarksByFolder.has(folderKey)) {
+        this.bookmarksByFolder.set(folderKey, []);
+      }
+      this.bookmarksByFolder.get(folderKey)!.push(bookmark);
+    });
+    
+    // 按集合分组文件夹
+    this.data.folders.forEach(folder => {
+      const key = `${folder.collectionId}:${folder.parentId || 'root'}`;
+      if (!this.foldersByCollection.has(key)) {
+        this.foldersByCollection.set(key, []);
+      }
+      this.foldersByCollection.get(key)!.push(folder);
+    });
+    
+    // 对索引进行排序
+    this.bookmarksByCollection.forEach(bookmarks => {
+      bookmarks.sort((a, b) => a.sortOrder - b.sortOrder);
+    });
+    
+    this.bookmarksByFolder.forEach(bookmarks => {
+      bookmarks.sort((a, b) => a.sortOrder - b.sortOrder);
+    });
+    
+    this.foldersByCollection.forEach(folders => {
+      folders.sort((a, b) => a.sortOrder - b.sortOrder);
+    });
+    
+    console.log('🔍 Indexes built:', {
+      bookmarksByCollection: this.bookmarksByCollection.size,
+      bookmarksByFolder: this.bookmarksByFolder.size,
+      foldersByCollection: this.foldersByCollection.size
+    });
   }
 
   // 刷新数据
   refresh() {
-    this.data = loadData();
+    this.loadDataWithCache();
+  }
+
+  // 确保数据已加载
+  private ensureDataLoaded() {
+    if (!this.data) {
+      this.loadDataWithCache();
+    }
+    return this.data!;
   }
 
   // 获取所有集合
   getCollections(publicOnly = false): Collection[] {
-    let collections = this.data.collections;
+    const data = this.ensureDataLoaded();
+    let collections = data.collections;
     if (publicOnly) {
       collections = collections.filter(c => c.isPublic);
     }
@@ -231,24 +368,27 @@ export class DataService {
 
   // 根据ID获取集合
   getCollectionById(id: string): Collection | null {
-    return this.data.collections.find(c => c.id === id) || null;
+    const data = this.ensureDataLoaded();
+    return data.collections.find(c => c.id === id) || null;
   }
 
   // 根据slug获取集合
   getCollectionBySlug(slug: string): Collection | null {
-    return this.data.collections.find(c => c.slug === slug) || null;
+    const data = this.ensureDataLoaded();
+    return data.collections.find(c => c.slug === slug) || null;
   }
 
-  // 获取集合的文件夹
+  // 获取集合的文件夹（使用索引优化）
   getFoldersByCollection(collectionId: string, parentId?: string | null): Folder[] {
-    return this.data.folders
-      .filter(f => f.collectionId === collectionId && f.parentId === parentId)
-      .sort((a, b) => a.sortOrder - b.sortOrder);
+    this.ensureDataLoaded();
+    const key = `${collectionId}:${parentId || 'root'}`;
+    return this.foldersByCollection.get(key) || [];
   }
 
   // 根据ID获取文件夹
   getFolderById(id: string): Folder | null {
-    return this.data.folders.find(f => f.id === id) || null;
+    const data = this.ensureDataLoaded();
+    return data.folders.find(f => f.id === id) || null;
   }
 
   // 获取文件夹路径（面包屑）
@@ -264,53 +404,95 @@ export class DataService {
     return path;
   }
 
-  // 获取书签
-  getBookmarks(collectionId: string, folderId?: string | null): Bookmark[] {
-    return this.data.bookmarks
-      .filter(b => b.collectionId === collectionId && b.folderId === folderId)
-      .sort((a, b) => a.sortOrder - b.sortOrder);
+  // 获取书签（支持分页，使用索引优化）
+  getBookmarks(collectionId: string, folderId?: string | null, limit?: number, offset?: number): Bookmark[] {
+    this.ensureDataLoaded();
+    const key = `${collectionId}:${folderId || 'root'}`;
+    let bookmarks = this.bookmarksByFolder.get(key) || [];
+    
+    // 如果指定了分页参数，则进行分页
+    if (limit !== undefined) {
+      const start = offset || 0;
+      bookmarks = bookmarks.slice(start, start + limit);
+    }
+    
+    // 优化图标（仅在需要时）
+    return iconOptimizer.processBookmarkIcons(bookmarks);
   }
 
-  // 搜索书签
-  searchBookmarks(query: string, collectionId?: string): Bookmark[] {
+  // 获取书签总数（使用索引优化）
+  getBookmarksCount(collectionId: string, folderId?: string | null): number {
+    this.ensureDataLoaded();
+    const key = `${collectionId}:${folderId || 'root'}`;
+    return (this.bookmarksByFolder.get(key) || []).length;
+  }
+
+  // 搜索书签（支持分页）
+  searchBookmarks(query: string, collectionId?: string, limit?: number, offset?: number): { bookmarks: Bookmark[], total: number } {
+    const data = this.ensureDataLoaded();
     const searchTerm = query.toLowerCase();
-    let bookmarks = this.data.bookmarks;
+    let bookmarks = data.bookmarks;
     
     if (collectionId) {
       bookmarks = bookmarks.filter(b => b.collectionId === collectionId);
     }
     
-    return bookmarks.filter(bookmark => 
+    const filteredBookmarks = bookmarks.filter(bookmark => 
       bookmark.title.toLowerCase().includes(searchTerm) ||
       bookmark.description?.toLowerCase().includes(searchTerm) ||
       bookmark.url.toLowerCase().includes(searchTerm) ||
       bookmark.tags.some(tag => tag.toLowerCase().includes(searchTerm))
     );
+
+    const total = filteredBookmarks.length;
+    
+    // 如果指定了分页参数，则进行分页
+    if (limit !== undefined) {
+      const start = offset || 0;
+      return {
+        bookmarks: filteredBookmarks.slice(start, start + limit),
+        total
+      };
+    }
+    
+    return {
+      bookmarks: filteredBookmarks,
+      total
+    };
   }
 
-  // 获取集合的书签数量
+  // 获取集合的书签数量（使用索引优化）
   getBookmarkCount(collectionId: string): number {
-    return this.data.bookmarks.filter(b => b.collectionId === collectionId).length;
+    this.ensureDataLoaded();
+    return (this.bookmarksByCollection.get(collectionId) || []).length;
   }
 
   // 获取设置
   getSettings(): SiteSettings {
-    return this.data.settings;
+    const data = this.ensureDataLoaded();
+    return data.settings;
   }
 
   // 获取特定设置
   getSetting(key: keyof SiteSettings): string | boolean {
-    return this.data.settings[key];
+    const data = this.ensureDataLoaded();
+    return data.settings[key];
   }
 
-  // 获取所有书签
-  getAllBookmarks(): Bookmark[] {
-    return this.data.bookmarks;
+  // 获取所有书签（支持分页）
+  getAllBookmarks(limit?: number, offset?: number): Bookmark[] {
+    const data = this.ensureDataLoaded();
+    if (limit !== undefined) {
+      const start = offset || 0;
+      return data.bookmarks.slice(start, start + limit);
+    }
+    return data.bookmarks;
   }
 
   // 获取所有文件夹
   getAllFolders(): Folder[] {
-    return this.data.folders;
+    const data = this.ensureDataLoaded();
+    return data.folders;
   }
 }
 

@@ -19,23 +19,27 @@ export async function GET(request: Request) {
       });
     }
 
-    // 执行搜索
-    let searchResults = dataService.searchBookmarks(
+    // 计算分页参数
+    const offset = (page - 1) * pageSize;
+    
+    // 执行搜索（直接使用分页）
+    const { bookmarks: paginatedResults, total } = dataService.searchBookmarks(
       query,
-      scope === 'current' ? collectionId || undefined : undefined
+      scope === 'current' ? collectionId || undefined : undefined,
+      pageSize,
+      offset
     );
-
-    // 分页处理
-    const total = searchResults.length;
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedResults = searchResults.slice(startIndex, endIndex);
 
     return NextResponse.json({
       bookmarks: paginatedResults,
       total,
       page,
-      pageSize
+      pageSize,
+      totalPages: Math.ceil(total / pageSize)
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=30'
+      }
     });
   } catch (error) {
     console.error('搜索失败:', error);
