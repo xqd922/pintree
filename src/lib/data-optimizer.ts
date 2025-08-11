@@ -43,7 +43,9 @@ class DataOptimizer {
     // 缓存结果，但限制缓存大小
     if (this.processedCache.size > 10) {
       const firstKey = this.processedCache.keys().next().value;
-      this.processedCache.delete(firstKey);
+      if (firstKey) {
+        this.processedCache.delete(firstKey);
+      }
     }
     
     this.processedCache.set(cacheKey, processed);
@@ -79,7 +81,9 @@ class DataOptimizer {
     // 限制缓存大小
     if (this.hostnameCache.size > 1000) {
       const firstKey = this.hostnameCache.keys().next().value;
-      this.hostnameCache.delete(firstKey);
+      if (firstKey) {
+        this.hostnameCache.delete(firstKey);
+      }
     }
 
     this.hostnameCache.set(url, hostname);
