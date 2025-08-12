@@ -757,6 +757,7 @@
             "type": "link",
             "addDate": 1732597575923,
             "title": "Fgaoxing_Fgaoxing的个人博客",
+            "icon": "icons/vercel-cyfan_yt-blog_top.ico",
             "url": "https://vercel-cyfan.yt-blog.top/"
           },
           {
@@ -894,6 +895,7 @@
             "type": "link",
             "addDate": 1750475500910,
             "title": "Articles | Blog Rewired 🍀",
+            "icon": "icons/blog_rewired_moe.ico",
             "url": "https://blog.rewired.moe/"
           },
           {
@@ -1130,6 +1132,13 @@
             "title": "Internet speedtest in progress",
             "icon": "icons/ting_speedtestcustom_com.ico",
             "url": "https://ting.speedtestcustom.com/"
+          },
+          {
+            "type": "link",
+            "addDate": 1754986857485,
+            "title": "Stripe | 金融新基建，增长强引擎",
+            "icon": "icons/stripe_com.ico",
+            "url": "https://stripe.com/zh-hk"
           }
         ]
       },
@@ -1496,6 +1505,7 @@
             "type": "link",
             "addDate": 1744891159576,
             "title": "Easy Cat Timer",
+            "icon": "icons/cn_easycattimer_com.ico",
             "url": "https://cn.easycattimer.com/"
           },
           {
@@ -1607,13 +1617,6 @@
             "title": "",
             "icon": "icons/stripe_com.ico",
             "url": "https://stripe.com/"
-          },
-          {
-            "type": "link",
-            "addDate": 1741068547762,
-            "title": "Stripe | 金融新基建，增长强引擎",
-            "icon": "icons/stripe_com.ico",
-            "url": "https://stripe.com/zh-hk"
           },
           {
             "type": "link",

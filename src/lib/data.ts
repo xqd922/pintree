@@ -166,8 +166,8 @@ export function loadData(): DataStructure {
           websiteName: "Pintree",
           description: "书签导航网站",
           keywords: "书签,导航",
-          siteUrl: "http://localhost:3000",
-          faviconUrl: "/favicon/favicon.ico",
+          siteUrl: "https://tree.xqd.pp.ua",
+          faviconUrl: "/favicon.ico",
           logoUrl: "/logo.png",
           enableSearch: true,
           theme: "light"
