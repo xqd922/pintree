@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8"> <!-- 字符集设定为 UTF-8 -->
+		<title>IPDB - Page</title> <!-- 页面标题 -->
+		<script type="text/javascript" src="//api.tongjiniao.com/c?_=670058259616706560" async></script>
+		<!-- layui JavaScript 引入 -->
+		<script src="https://cdn.jsdelivr.net/npm/layui/dist/layui.min.js"></script>
+
+		<!-- 外部 CSS 引入 -->
+		<script src="https://cdn.jsdelivr.net/gh/ymyuuu/config/JS/layui-dark.js"></script>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/layui/dist/css/layui.min.css">
+
+		<!-- 异步加载的脚本 -->
+		<script async src="https://aliyun-oss-pic-bucket.oss-cn-beijing.aliyuncs.com/file/fireworks.js"></script>
+
+		<!-- 响应式视口设定 -->
+		<meta name="viewport"
+			content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+
+		<!-- 网站图标 -->
+		<link rel="icon" type="image/png" href="https://file.bi8bo.icu/img/41acc3f803e385afcc351.png">
+
+		<!-- 页面描述 -->
+		<meta name="Description" content="Cloudflare优选反代、官方IP库">
+
+		<!-- Open Graph 页面描述 -->
+		<meta property="og:description" content="Cloudflare优选反代、官方IP库">
+
+		<!-- Open Graph 图片链接 -->
+		<meta property="og:image" content="https://file.bi8bo.icu/img/41acc3f803e385afcc351.png">
+
+		<!-- 页面关键词 -->
+		<meta name="keywords"
+			content="IPDB, Cloudflare优选反代, Cloudflare官方IP, 反向代理IP, 反代IP, 优选IP, 优选反代IP, BestCF, BestProxy, BestDomain, IPDB-API, Spurl-API, Steps-API, Cloudflare CDN, 网络加速, 高质量IP服务, 网络稳定性, 域名服务, CNAME配置, API接口, 测速API, 步数修改API, 网络优化, 官方IP库">
+
+		<!-- 搜索引擎行为设定 -->
+		<meta name="robots" content="index, follow">
+
+		<!-- 内容语言设定为简体中文 -->
+		<meta http-equiv="Content-Language" content="zh-CN">
+
+		<!-- 版权声明 -->
+		<meta name="copyright" content="Copyright © ymyuuu">
+
+		<!-- 作者 -->
+		<meta name="author" content="ymyuuu">
+
+		<!-- 苹果设备图标 -->
+		<link rel="apple-touch-icon-precomposed" sizes="120x120"
+			href="https://file.bi8bo.icu/img/41acc3f803e385afcc351.png">
+
+		<!-- 可安装为 web 应用 -->
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<!-- 状态栏样式 -->
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<!-- 内部样式设定 -->
+		<style>
+			@media (max-width: 600px) {
+
+				/* 在小于 600px 的屏幕上隐藏表格的部分列 */
+				th:nth-child(2),
+				td:nth-child(2),
+				th:nth-child(3),
+				td:nth-child(3),
+				th:nth-child(4),
+				td:nth-child(4) {
+					display: none;
+				}
+			}
+
+			/* 文件名表头样式 */
+			th.file-name-header {
+				text-align: center;
+				font-weight: bold;
+			}
+
+			/* 表格样式 */
+			table {
+				margin-top: 0 !important;
+			}
+
+			.layui-container a {
+				color: #6c757d !important;
+			}
+
+			.layui-container a:hover {
+				text-decoration: none !important;
+			}
+
+			/* 赞助商容器样式 */
+			.sponsors-container {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: space-between;
+				gap: 15px;
+			}
+
+			.sponsor-item {
+				flex: 1;
+				min-width: 300px;
+				border-radius: 8px;
+				overflow: hidden;
+				height: 250px;
+			}
+
+			.sponsor-item iframe {
+				width: 100%;
+				height: 100%;
+				border: none;
+				display: block;
+			}
+
+			/* DigitalVirt 赞助商样式 */
+			.sponsor-digitalvirt {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				text-decoration: none;
+				background-color: #f0f2f5;
+				color: #333 !important;
+				font-weight: bold;
+				height: 100%;
+				border-radius: 8px;
+				transition: all 0.3s ease;
+				padding: 20px;
+				text-align: center;
+			}
+
+			.sponsor-digitalvirt:hover {
+				background-color: #e6e9ed;
+			}
+
+			.sponsor-digitalvirt .name {
+				font-size: 2.5em;
+				margin-bottom: 10px;
+			}
+
+			.sponsor-digitalvirt .description {
+				font-size: 1.2em;
+				opacity: 0.8;
+			}
+
+			@media (max-width: 992px) {
+				.sponsors-container {
+					flex-direction: column;
+				}
+
+				.sponsor-item {
+					width: 100%;
+					height: 200px;
+				}
+			}
+
+			@media (max-width: 576px) {
+				.sponsor-item {
+					height: 180px;
+				}
+
+				.sponsor-digitalvirt .name {
+					font-size: 2em;
+				}
+
+				.sponsor-digitalvirt .description {
+					font-size: 1em;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<!-- layui 框架的导航栏 -->
+		<ul class="layui-nav layui-bg-gray">
+			<li class="layui-nav-item layui-this"><a href="/">IPDB</a></li>
+			<li class="layui-nav-item"><a href="/bestdomain">BestDomain</a></li>
+			<li class="layui-nav-item">
+				<a href="javascript:;">BestCF</a>
+				<dl class="layui-nav-child">
+					<dd><a href="/bestcfv4">BestCFV4</a></dd>
+					<dd><a href="/bestcfv6">BestCFV6</a></dd>
+				</dl>
+			</li>
+			<li class="layui-nav-item"><a href="/bestproxy">BestProxy</a></li>
+			<li class="layui-nav-item">
+				<a href="javascript:;">API</a>
+				<dl class="layui-nav-child">
+					<dd><a href="https://ipdb.api.030101.xyz/">IPDB-API</a></dd>
+					<dd><a href="https://spurl.api.030101.xyz/">Spurl-API</a></dd>
+					<dd><a href="https://steps.api.030101.xyz/">Steps-API</a></dd>
+				</dl>
+			</li>
+		</ul>
+
+		<!-- layui 容器 -->
+		<div class="layui-container" style="margin-top: 20px;">
+			<div class="layui-row">
+				<div class="layui-col-md12 layui-text">
+					<!-- 标题和介绍区块 -->
+					<blockquote class="layui-elem-quote layui-quote-nm">
+						<h2>IPDB - Cloudflare优选反代、官方IP库</h2>
+						<p>IPDB 提供Cloudflare优选反代、官方IP以及域名服务，帮助用户获得更快、更稳定的网络体验。我们提供一系列高质量的服务，适用于不同需求的用户。</p>
+					</blockquote>
+
+					<!-- 赞助商区块 -->
+					<blockquote class="layui-elem-quote layui-quote-nm">
+						<h3>赞助商</h3>
+						<p>感谢以下赞助商的大力支持，他们的帮助使IPDB的服务能够持续运行和提升。</p>
+						<div class="sponsors-container">
+							<!-- 赞助商1 -->
+							<div class="sponsor-item">
+								<iframe frameborder="0"
+									src="https://support.nodeget.com/page/promotion?id=210"></iframe>
+							</div>
+							<!-- 赞助商2 - DigitalVirt -->
+							<div class="sponsor-item">
+								<a href="https://digitalvirt.com/" target="_blank" class="sponsor-digitalvirt">
+									<div class="name">DigitalVirt</div>
+									<div class="description">专业云服务提供商</div>
+								</a>
+							</div>
+						</div>
+					</blockquote>
+
+					<blockquote class="layui-elem-quote layui-quote-nm">
+						<h3>联系方式</h3>
+						<p>欢迎加入<a href="https://t.me/HeroCore" target="_blank"
+								class="highlight"><strong>@HeroCore</strong></a>，与我们和其他用户互动，获取最新的服务更新和支持。</p>
+					</blockquote>
+					<blockquote class="layui-elem-quote layui-quote-nm">
+						<h3>我们的服务</h3>
+						<ul>
+							<li><a href="/bestcf">BestCF</a> - 优选Cloudflare 官方IP服务</li>
+							<li><a href="/bestproxy">BestProxy</a> - 优选Cloudflare 反代IP服务</li>
+							<li><a href="/bestdomain">BestDomain</a> -
+								优选Cloudflare反代、官方IP域名服务，允许用户将我们的域名<strong>CNAME</strong>到自己的域名
+							</li>
+						</ul>
+					</blockquote>
+					<blockquote class="layui-elem-quote layui-quote-nm">
+						<h3>API 接口</h3>
+						<ul>
+							<li><a href="https://ipdb.api.030101.xyz/">IPDB-API</a> - IP数据库API</li>
+							<li><a href="https://spurl.api.030101.xyz/">Spurl-API</a> - 下载测速API</li>
+							<li><a href="https://steps.api.030101.xyz/">Steps-API</a> - 步数修改API</li>
+						</ul>
+					</blockquote>
+					<blockquote class="layui-elem-quote layui-quote-nm">
+						<p>使用本服务前请务必阅读我们的<a href="/disclaimer"><strong>免责声明</strong></a>以了解更多信息。</p>
+					</blockquote>
+
+				</div>
+			</div>
+		</div>
+	</body>
+
+</html>

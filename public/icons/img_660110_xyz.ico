@@ -1,0 +1,367 @@
+
+ <!DOCTYPE html>
+ <html>
+ <head>
+  <meta charset="UTF-8">
+  <title>图床</title>
+  <style>
+  body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  line-height: 1.6;
+  background-color: #f5f7fa;
+  background-image:
+  linear-gradient(to right, #eaeaea 1px, transparent 1px),
+  linear-gradient(to bottom, #eaeaea 1px, transparent 1px);
+  background-size: 20px 20px; /* 每个网格的大小 */
+  }
+  .upload-area {
+  border: 2px solid #1890ff;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s;
+  }
+  .upload-area:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+  #fileInput {
+  display: none;
+  }
+  .custom-upload-btn {
+  background: #1890ff;
+  color: white;
+  padding: 10px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+  margin: 0 8px;
+  font-size: 16px;
+  }
+  .custom-upload-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  }
+  #progress {
+  height: 8px;
+  background: #f0f6ff;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  }
+  #progress-bar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%);
+  transition: width 0.4s ease-out;
+  border-radius: 8px;
+  }
+  #result {
+  margin-top: 1.5rem;
+  padding: 16px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .format-selector {
+  margin: 1.5rem 0;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  }
+  .format-btn {
+  padding: 8px 20px;
+  border-radius: 20px;
+  background: #f0f5ff;
+  border: 1px solid #d9e7ff;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #1890ff;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(28, 41, 90, 0.05);
+  }
+  .format-btn:hover {
+  background: #e6f7ff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(28, 41, 90, 0.1);
+  }
+  .format-btn.active {
+  background: #1890ff;
+  color: white;
+  border-color: #1890ff;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+  }
+  .code-box {
+  padding: 16px;
+  background: #f8faff;
+  border-radius: 8px;
+  border: 2px solid #e6f4ff;
+  margin: 1.5rem 0;
+  cursor: pointer;
+  position: relative;
+  word-break: break-all;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  max-height: 300px;
+  transition: all 0.3s;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  line-height: 1.6;
+  color: #1f2d3d;
+  }
+  .code-box:hover {
+  border-color: #1890ff;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1);
+  }
+  .code-box::after {
+  content: "点击复制";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(24, 144, 255, 0.1);
+  color: #1890ff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  }
+  .code-box:hover::after {
+  opacity: 1;
+  }
+  #fileList {
+  list-style: none;
+  margin: 1rem 0;
+  padding: 0;
+  text-align: left;
+  }
+  #fileList li {
+  margin: 4px 0;
+  padding: 6px 12px;
+  background: #f0f5ff;
+  border-left: 4px solid #1890ff;
+  border-radius: 4px;
+  font-size: 14px;
+  }
+  .copy-notice {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1890ff;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  animation: slideIn 0.3s, fadeOut 0.3s 2s forwards;
+  z-index: 1000;
+  }
+  @keyframes slideIn {
+  from { top: -50px; }
+  to { top: 20px; }
+  }
+  @keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+  }
+  header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  }
+  h2 {
+  margin: 0.5rem 0;
+  color: #1890ff;
+  }
+  </style>
+ </head>
+ <body>
+  <div class="upload-area" id="dropZone">
+  <header>
+  <h2>图床</h2>
+  <h3>支持粘贴、拖拽、批量上传</h3>
+  </header>
+
+  <label class="custom-upload-btn" onclick="document.getElementById('fileInput').click()">
+  📁 选择文件
+  </label>
+  <input type="file" id="fileInput" multiple>
+  <button class="custom-upload-btn" onclick="startUpload()">🚀 开始上传</button>
+
+  <ul id="fileList"></ul>
+
+  <div id="progress">
+  <div id="progress-bar"></div>
+  </div>
+
+  <div id="result"></div>
+  </div>
+
+  <div id="copyNotice" class="copy-notice" style="display: none;"></div>
+
+  <script>
+  let fileQueue = [];
+  let uploadedUrls = [];
+
+  function showCopyNotice() {
+  const notice = document.getElementById('copyNotice');
+  notice.style.display = 'block';
+  notice.textContent = '✅ 已复制到剪贴板';
+  setTimeout(() => {
+  notice.style.display = 'none';
+  }, 2000);
+  }
+
+  function generateFormat(type, url) {
+  switch(type) {
+  case 'url': return url;
+  case 'bbcode': return `[img]${url}[/img]`;
+  case 'markdown': return `![image](${url})`;
+  default: return url;
+  }
+  }
+
+  function updateCodeBox(type) {
+  const contents = uploadedUrls.map(url => generateFormat(type, url)).join('\n');
+  const codeBox = document.getElementById('codeContent');
+
+  document.querySelectorAll('.format-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelector(`[data-type="${type}"]`).classList.add('active');
+
+  codeBox.textContent = contents;
+  copyToClipboard(contents).then(success => {
+  if(success) showCopyNotice();
+  else prompt('复制失败，请手动复制：', contents);
+  });
+  }
+
+  async function copyToClipboard(text) {
+  try {
+  await navigator.clipboard.writeText(text);
+  return true;
+  } catch {
+  return false;
+  }
+  }
+
+  async function startUpload() {
+  const files = fileQueue.length ? fileQueue : Array.from(document.getElementById('fileInput').files);
+  if (!files.length) return alert('请先选择或粘贴/拖拽文件');
+
+  fileQueue = [];
+  uploadedUrls = [];
+
+  try {
+  let total = files.length;
+  let current = 0;
+
+  for (const file of files) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch('https://oss.hexoxe.com/file/upload/', {
+  method: 'POST',
+  body: formData,
+  });
+
+  if (!response.ok) {
+  const error = await response.json();
+  throw new Error(error.msg || '文件上传失败');
+  }
+
+  const result = await response.json();
+  if (result.code === 200 && result.data && result.data.path) {
+  uploadedUrls.push('https:' + result.data.path); // 确保使用 https
+  } else {
+  throw new Error(result.msg || '上传成功，但未返回有效的图片路径');
+  }
+
+  current++;
+  const percent = Math.round((current / total) * 100);
+  document.getElementById('progress-bar').style.width = `${percent}%`;
+  }
+
+  document.getElementById('result').innerHTML = `
+  <div style="color: #52c41a;">
+  <p>✅ 共上传成功 ${uploadedUrls.length} 个文件</p>
+  <hr style="margin: 12px 0;">
+  <div class="format-selector">
+  <button class="format-btn active" data-type="url" onclick="updateCodeBox('url')">URL</button>
+  <button class="format-btn" data-type="bbcode" onclick="updateCodeBox('bbcode')">BBCode</button>
+  <button class="format-btn" data-type="markdown" onclick="updateCodeBox('markdown')">Markdown</button>
+  </div>
+  <div class="code-box" onclick="copyToClipboard(document.getElementById('codeContent').textContent).then(showCopyNotice)">
+  <pre id="codeContent">${uploadedUrls.join('\n')}</pre>
+  </div>
+  </div>
+  `;
+
+  document.getElementById('fileList').innerHTML = '';
+  copyToClipboard(uploadedUrls.join('\n')).then(showCopyNotice);
+  } catch (err) {
+  console.error('上传失败:', err);
+  document.getElementById('result').innerHTML = `
+  <div style="color: #ff4d4f;">
+  <p>❌ 上传失败：${err.message}</p>
+  <p>💡 建议：刷新页面后重试</p>
+  </div>
+  `;
+  } finally {
+  setTimeout(() => {
+  document.getElementById('progress-bar').style.width = '0%';
+  }, 1000);
+  }
+  }
+
+  function renderFileList() {
+  const list = document.getElementById('fileList');
+  list.innerHTML = '';
+  for (const file of fileQueue) {
+  const li = document.createElement('li');
+  li.textContent = file.name;
+  list.appendChild(li);
+  }
+  }
+
+  document.getElementById('fileInput').addEventListener('change', e => {
+  fileQueue = Array.from(e.target.files);
+  renderFileList();
+  });
+
+  const dropZone = document.getElementById('dropZone');
+  dropZone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropZone.style.background = '#e6f7ff';
+  });
+  dropZone.addEventListener('dragleave', () => {
+  dropZone.style.background = 'rgba(255, 255, 255, 0.9)';
+  });
+  dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.style.background = 'rgba(255, 255, 255, 0.9)';
+  if (e.dataTransfer.files.length > 0) {
+  fileQueue = Array.from(e.dataTransfer.files);
+  renderFileList();
+  document.getElementById('result').innerHTML = `<p>📝 共拖入 ${fileQueue.length} 个文件，准备上传...</p>`;
+  }
+  });
+
+  document.addEventListener('paste', e => {
+  const items = e.clipboardData.items;
+  for (const item of items) {
+  if (item.type.indexOf('image') !== -1) {
+  const file = item.getAsFile();
+  fileQueue.push(file);
+  renderFileList();
+  document.getElementById('result').innerHTML = `<p>📋 已粘贴截图，准备上传...</p>`;
+  }
+  }
+  });
+  </script>
+  <script defer src="https://u.qu.ac.cn/script.js" data-website-id="e54b1375-08fd-4820-b33e-75f4e46e64ad"></script>
+ </body>
+ </html>
+ 
